@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4PP3X | Frank Karani - Cybersecurity Professional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff41;
+            overflow-x: hidden;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.12;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00ff41;
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .logo span {
+            color: #ff00ff;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #00ff41;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            text-shadow: 0 0 8px #00ff41;
+            color: #fff;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+        }
+
+        .glitch {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 2px 2px 0 #ff00ff, -2px -2px 0 #00ff41;
+            animation: glitch 0.3s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-1px, 1px); }
+            40% { transform: translate(-1px, -1px); }
+            60% { transform: translate(1px, 1px); }
+            80% { transform: translate(1px, -1px); }
+            100% { transform: translate(0); }
+        }
+
+        .handle {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #00ff41;
+            padding: 1.5rem;
+            min-width: 140px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff00ff;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn-primary, .btn-secondary {
+            padding: 0.8rem 2rem;
+            border: none;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border-radius: 5px;
+            margin: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #00ff41;
+            color: #0a0a0a;
+        }
+
+        .btn-primary:hover {
+            background: #00cc33;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #00ff41;
+            color: #00ff41;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 65, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .bracket {
+            color: #ff00ff;
+        }
+
+        /* Cards Grid */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+        }
+
+        .achievement-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff41;
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .achievement-card:hover::before {
+            left: 100%;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.2);
+        }
+
+        .achievement-icon {
+            font-size: 2.5rem;
+        }
+
+        .achievement-rank {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ff00ff;
+            margin: 0.5rem 0;
+        }
+
+        /* Skills */
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff41;
+            padding: 1.2rem;
+            border-radius: 10px;
+        }
+
+        .skill-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-bar {
+            background: #1a1a1a;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .skill-fill {
+            background: #00ff41;
+            height: 100%;
+            width: 0%;
+            transition: width 1.5s ease;
+            box-shadow: 0 0 5px #00ff41;
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff41;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            text-decoration: none;
+            color: #00ff41;
+            transition: all 0.3s;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .contact-card:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .contact-card i {
+            font-size: 1.5rem;
+        }
+
+        .education-info {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #00ff41;
+        }
+
+        .education-info p {
+            margin: 0.5rem 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #333;
+            margin-top: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .glitch { font-size: 2rem; }
+            .nav-menu { display: none; }
+            .stats-grid { gap: 1rem; }
+            .stat-card { padding: 0.8rem; min-width: 90px; }
+            .stat-value { font-size: 1.5rem; }
+            .achievements-grid { grid-template-columns: 1fr; }
+            .skills-container { grid-template-columns: 1fr; }
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">{4PP3X}<span>.sec</span></div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">$ whoami</a></li>
+                <li><a href="#achievements" class="nav-link">$ achievements</a></li>
+                <li><a href="#skills" class="nav-link">$ skills</a></li>
+                <li><a href="#contact" class="nav-link">$ contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="glitch" data-text="FRANK KARANI">FRANK KARANI</h1>
+            <p class="handle">@4PP3X <span class="cursor">_</span></p>
+            <p style="margin-top: 0.5rem; color: #888;">Cybersecurity Enthusiast | Ethical Hacker | CTF Player</p>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value">#15</div><div class="stat-label">Global CTF Rank</div></div>
+                <div class="stat-card"><div class="stat-value">100%</div><div class="stat-label">Web Security</div></div>
+                <div class="stat-card"><div class="stat-value">Top 50</div><div class="stat-label">TCRA Champions</div></div>
+                <div class="stat-card"><div class="stat-value">3rd</div><div class="stat-label">ExploitRoom</div></div>
+            </div>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="document.getElementById('achievements').scrollIntoView({behavior:'smooth'})">📜 View Achievements</button>
+                <button class="btn-secondary" onclick="window.open('https://tryhackme.com/p/4pp3x', '_blank')">🛡️ TryHackMe Profile</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="achievements" class="section">
+        <div class="container">
+            <h2 class="section-title"><span class="bracket">[</span> Competitive Achievements <span class="bracket">]</span></h2>
+            <div class="achievements-grid" id="achievementsGrid"><div style="text-align:center;">Loading achievements...</div></div>
+        </div>
+    </section>
+
+    <section id="skills" class="section" style="background: rgba(0,0,0,0.3);">
+        <div class="container">
+            <h2 class="section-title"><span class="bracket">[</span> Technical Arsenal <span class="bracket">]</span></h2>
+            <div class="skills-container" id="skillsContainer"><div style="text-align:center;">Loading skills...</div></div>
+        </div>
+    </section>
+
+    <section id="contact" class="section">
+        <div class="container">
+            <h2 class="section-title"><span class="bracket">[</span> Connect <span class="bracket">]</span></h2>
+            <div class="contact-grid">
+                <a href="https://linkedin.com/in/frank-karani" target="_blank" class="contact-card"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
+                <a href="https://instagram.com/4pp3x" target="_blank" class="contact-card"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+                <a href="https://github.com/4pp3x" target="_blank" class="contact-card"><i class="fab fa-github"></i><span>GitHub</span></a>
+                <a href="mailto:frank.karani@iaa.ac.tz" class="contact-card"><i class="fas fa-envelope"></i><span>Email</span></a>
+            </div>
+            <div class="education-info">
+                <p><i class="fas fa-graduation-cap"></i> Institute of Accountancy Arusha (IAA) | First Year - Cybersecurity</p>
+                <p><i class="fas fa-users"></i> Member: Team 0x | DragonByte International</p>
+                <p><i class="fas fa-trophy"></i> TCRA CyberChampions Top 50 | CTFZone Global #15</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p><i class="fas fa-shield-alt"></i> "Security is not a product, it's a process" - Bruce Schneier</p>
+            <p style="margin-top: 1rem; font-size: 0.8rem;">© 2026 Frank Karani (4PP3X) | All rights reserved</p>
+        </div>
+    </footer>
+
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        
+        const chars = "01アイウエオカキクケコABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()";
+        const drops = [];
+        for (let i = 0; i < canvas.width / 20; i++) drops.push(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = '15px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * 20, drops[i] * 20);
+                if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 35);
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            for (let i = 0; i < canvas.width / 20; i++) drops.push(1);
+        });
+
+        // Load data from API
+        async function loadAchievements() {
+            try {
+                const res = await fetch('/api/public/achievements');
+                const data = await res.json();
+                document.getElementById('achievementsGrid').innerHTML = data.map(a => `
+                    <div class="achievement-card">
+                        <div class="achievement-icon">${a.icon || '🏆'}</div>
+                        <div class="achievement-rank">${a.rank}</div>
+                        <div style="font-size:1.1rem; margin:0.5rem 0;">${a.title}</div>
+                        <div style="color:#888;">${a.competition} • ${a.date}</div>
+                        <div style="margin-top:0.5rem;">⭐ Score: ${a.score}</div>
+                    </div>
+                `).join('');
+            } catch(e) { 
+                console.error('Error loading achievements:', e);
+                document.getElementById('achievementsGrid').innerHTML = '<div style="text-align:center;">Failed to load achievements. Make sure server is running.</div>';
+            }
+        }
+
+        async function loadSkills() {
+            try {
+                const res = await fetch('/api/public/skills');
+                const data = await res.json();
+                document.getElementById('skillsContainer').innerHTML = data.map(s => `
+                    <div class="skill-card">
+                        <div class="skill-name">${s.name}</div>
+                        <div class="skill-bar"><div class="skill-fill" style="width:${s.level}%"></div></div>
+                        <div style="margin-top:0.3rem; font-size:0.8rem;">${s.category} • ${s.level}%</div>
+                    </div>
+                `).join('');
+            } catch(e) { 
+                console.error('Error loading skills:', e);
+                document.getElementById('skillsContainer').innerHTML = '<div style="text-align:center;">Failed to load skills. Make sure server is running.</div>';
+            }
+        }
+
+        loadAchievements();
+        loadSkills();
+    </script>
+</body>
+</html>

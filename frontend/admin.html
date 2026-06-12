@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4PP3X Admin Panel - Secure Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; font-family: 'Share Tech Mono', monospace; color: #00ff41; overflow-x: hidden; }
+        
+        /* Matrix Background */
+        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.1; }
+        
+        /* Navigation */
+        .navbar { position: fixed; top: 0; width: 100%; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #00ff41; z-index: 1000; padding: 1rem 0; }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { font-size: 1.5rem; font-weight: bold; font-family: 'Orbitron', monospace; }
+        .logo span { color: #ff00ff; }
+        .nav-menu { display: flex; list-style: none; gap: 2rem; }
+        .nav-link { color: #00ff41; text-decoration: none; transition: all 0.3s; }
+        .nav-link:hover { text-shadow: 0 0 8px #00ff41; }
+        .logout-btn { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 0.5rem 1rem; cursor: pointer; border-radius: 5px; }
+        .logout-btn:hover { background: #ff4444; color: #0a0a0a; }
+        
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 6rem 2rem 2rem; }
+        
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: rgba(0,0,0,0.8); border: 1px solid #00ff41; padding: 1.5rem; border-radius: 10px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #ff00ff; }
+        
+        /* Forms */
+        .form-card { background: rgba(0,0,0,0.8); border: 1px solid #00ff41; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; }
+        .form-card h3 { margin-bottom: 1rem; color: #ff00ff; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; }
+        input, select, textarea { width: 100%; padding: 0.8rem; background: #1a1a1a; border: 1px solid #00ff41; color: #00ff41; border-radius: 5px; font-family: monospace; }
+        button { background: #00ff41; color: #0a0a0a; padding: 0.8rem 1.5rem; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; transition: all 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,255,65,0.3); }
+        .delete-btn { background: #ff4444; color: white; margin-left: 0.5rem; }
+        .delete-btn:hover { background: #cc0000; }
+        
+        /* Tables */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .data-table th, .data-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #333; }
+        .data-table th { color: #ff00ff; }
+        .data-table tr:hover { background: rgba(0,255,65,0.1); }
+        
+        /* Login Modal */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); }
+        .modal-content { background: #0a0a0a; border: 2px solid #00ff41; width: 90%; max-width: 400px; margin: 10% auto; padding: 2rem; border-radius: 10px; }
+        .modal-content input { width: 100%; padding: 0.8rem; margin: 0.5rem 0; background: #1a1a1a; border: 1px solid #00ff41; color: #00ff41; }
+        .login-btn { width: 100%; margin-top: 1rem; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid #00ff41; padding-bottom: 1rem; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: 1px solid #00ff41; color: #00ff41; }
+        .tab-btn.active { background: #00ff41; color: #0a0a0a; }
+        
+        /* Alerts */
+        .alert { position: fixed; top: 80px; right: 20px; padding: 1rem; border-radius: 5px; z-index: 1100; animation: slideIn 0.3s ease; }
+        .alert-success { background: #00ff41; color: #0a0a0a; }
+        .alert-error { background: #ff4444; color: white; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        
+        @media (max-width: 768px) { .container { padding: 5rem 1rem 1rem; } .stats-grid { grid-template-columns: 1fr 1fr; } .data-table { font-size: 12px; } }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-shield-alt"></i> 4PP3X Secure Access</h3>
+            <div id="loginStep1">
+                <p style="margin:1rem 0;">🔐 12+ character password + 2FA OTP</p>
+                <input type="text" id="username" placeholder="Username: 4PP3X">
+                <input type="password" id="password" placeholder="Password (min 12 characters)">
+                <button class="login-btn" onclick="submitLogin()">Verify →</button>
+            </div>
+            <div id="loginStep2" style="display:none;">
+                <p>📧 OTP sent to <strong id="otpEmailDisplay"></strong></p>
+                <input type="text" id="otpCode" placeholder="6-digit OTP" maxlength="6">
+                <button class="login-btn" onclick="verifyOTP()">Authenticate →</button>
+                <button onclick="resendOTP()" style="margin-top:0.5rem; background:transparent; border:1px solid #0f0; color:#0f0;">Resend OTP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" style="display:none;">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">{4PP3X}<span>.admin</span></div>
+                <ul class="nav-menu">
+                    <li><a href="#dashboard" class="nav-link">Dashboard</a></li>
+                    <li><a href="#achievements" class="nav-link">Achievements</a></li>
+                    <li><a href="#skills" class="nav-link">Skills</a></li>
+                    <li><a href="#documents" class="nav-link">Documents</a></li>
+                </ul>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('achievementsTab')">🏆 Achievements</button>
+                <button class="tab-btn" onclick="showTab('skillsTab')">⚡ Skills</button>
+                <button class="tab-btn" onclick="showTab('documentsTab')">📄 Documents</button>
+            </div>
+
+            <!-- Achievements Tab -->
+            <div id="achievementsTab" class="tab-content">
+                <div class="form-card">
+                    <h3>➕ Add New Achievement</h3>
+                    <div class="form-group"><label>Title</label><input type="text" id="achTitle" placeholder="e.g., Global Rank #15"></div>
+                    <div class="form-group"><label>Competition</label><input type="text" id="achCompetition" placeholder="e.g., CTFZone"></div>
+                    <div class="form-group"><label>Rank</label><input type="text" id="achRank" placeholder="e.g., #15 Worldwide"></div>
+                    <div class="form-group"><label>Score (0-100)</label><input type="number" id="achScore" placeholder="98"></div>
+                    <div class="form-group"><label>Date</label><input type="text" id="achDate" placeholder="2026"></div>
+                    <div class="form-group"><label>Icon (emoji)</label><input type="text" id="achIcon" placeholder="🏆"></div>
+                    <button onclick="addAchievement()">➕ Add Achievement</button>
+                </div>
+                <table class="data-table" id="achievementsTable"><thead><tr><th>Icon</th><th>Title</th><th>Competition</th><th>Rank</th><th>Score</th><th>Actions</th></tr></thead><tbody id="achievementsList"></tbody></table>
+            </div>
+
+            <!-- Skills Tab -->
+            <div id="skillsTab" class="tab-content" style="display:none;">
+                <div class="form-card">
+                    <h3>➕ Add New Skill</h3>
+                    <div class="form-group"><label>Skill Name</label><input type="text" id="skillName" placeholder="e.g., Web Security"></div>
+                    <div class="form-group"><label>Category</label><input type="text" id="skillCategory" placeholder="e.g., Offensive"></div>
+                    <div class="form-group"><label>Level (0-100)</label><input type="number" id="skillLevel" placeholder="95"></div>
+                    <button onclick="addSkill()">➕ Add Skill</button>
+                </div>
+                <table class="data-table" id="skillsTable"><thead><tr><th>Name</th><th>Category</th><th>Level</th><th>Actions</th></tr></thead><tbody id="skillsList"></tbody></table>
+            </div>
+
+            <!-- Documents Tab -->
+            <div id="documentsTab" class="tab-content" style="display:none;">
+                <div class="form-card">
+                    <h3>📝 Add New Document</h3>
+                    <div class="form-group"><label>Title</label><input type="text" id="docTitle" placeholder="Document title"></div>
+                    <div class="form-group"><label>Category</label><input type="text" id="docCategory" placeholder="e.g., Certificate, Writeup, CV"></div>
+                    <div class="form-group"><label>Content</label><textarea id="docContent" rows="4" placeholder="Document content..."></textarea></div>
+                    <button onclick="addDocument()">📄 Add Document</button>
+                </div>
+                <div id="documentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let currentEmail = '';
+
+        // Matrix Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const chars = "01アイウエオカキクケコABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()";
+        const drops = [];
+        for (let i = 0; i < canvas.width / 20; i++) drops.push(1);
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0,0,0,0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = '15px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * 20, drops[i] * 20);
+                if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = message;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        // ============ LOGIN ============
+        async function submitLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (password.length < 12) { showAlert('Password must be 12+ characters', 'error'); return; }
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentEmail = data.email;
+                    document.getElementById('otpEmailDisplay').innerText = currentEmail;
+                    document.getElementById('loginStep1').style.display = 'none';
+                    document.getElementById('loginStep2').style.display = 'block';
+                } else showAlert('Login failed: ' + (data.error || 'Invalid credentials'), 'error');
+            } catch(e) { showAlert('Error: ' + e.message, 'error'); }
+        }
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otpCode').value;
+            try {
+                const res = await fetch('/api/admin/verify-otp', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail, otp })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('adminToken', authToken);
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('adminDashboard').style.display = 'block';
+                    loadDashboard();
+                    loadAchievements();
+                    loadSkills();
+                    loadDocuments();
+                    showAlert('Welcome to Admin Panel!', 'success');
+                } else showAlert('Invalid OTP', 'error');
+            } catch(e) { showAlert('Error: ' + e.message, 'error'); }
+        }
+
+        async function resendOTP() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const res = await fetch('/api/admin/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (data.success) showAlert('New OTP sent!', 'success');
+            else showAlert('Failed to resend OTP', 'error');
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            authToken = null;
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('loginStep1').style.display = 'block';
+            document.getElementById('loginStep2').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('otpCode').value = '';
+        }
+
+        // ============ LOAD DATA ============
+        async function loadDashboard() {
+            try {
+                const [achRes, skillRes, docRes] = await Promise.all([
+                    fetch('/api/public/achievements'),
+                    fetch('/api/public/skills'),
+                    fetch('/api/public/documents')
+                ]);
+                const achievements = await achRes.json();
+                const skills = await skillRes.json();
+                const documents = await docRes.json();
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="stat-card"><div class="stat-number">${achievements.length}</div><div>🏆 Achievements</div></div>
+                    <div class="stat-card"><div class="stat-number">${skills.length}</div><div>⚡ Skills</div></div>
+                    <div class="stat-card"><div class="stat-number">${documents.length || 0}</div><div>📄 Documents</div></div>
+                `;
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadAchievements() {
+            const res = await fetch('/api/public/achievements');
+            const data = await res.json();
+            document.getElementById('achievementsList').innerHTML = data.map(a => `
+                <tr><td>${a.icon || '🏆'}</td><td>${a.title}</td><td>${a.competition}</td><td>${a.rank}</td><td>${a.score}</td>
+                <td><button class="delete-btn" onclick="deleteAchievement(${a.id})">Delete</button></td></tr>
+            `).join('');
+        }
+
+        async function loadSkills() {
+            const res = await fetch('/api/public/skills');
+            const data = await res.json();
+            document.getElementById('skillsList').innerHTML = data.map(s => `
+                <tr><td>${s.name}</td><td>${s.category}</td><td><div style="background:#1a1a1a; height:8px; width:100px;"><div style="background:#0f0; width:${s.level}%; height:100%;"></div></div> ${s.level}%</td>
+                <td><button class="delete-btn" onclick="deleteSkill(${s.id})">Delete</button></td></tr>
+            `).join('');
+        }
+
+        async function loadDocuments() {
+            const res = await fetch('/api/public/documents');
+            const data = await res.json();
+            document.getElementById('documentsList').innerHTML = `
+                <table class="data-table"><thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Actions</th></tr></thead><tbody>
+                ${data.map(d => `<tr><td>${d.title}</td><td>${d.category}</td><td>${new Date(d.createdAt).toLocaleDateString()}</td>
+                <td><button class="delete-btn" onclick="deleteDocument(${d.id})">Delete</button></td></tr>`).join('')}
+                </tbody></table>
+            `;
+        }
+
+        // ============ CRUD OPERATIONS ============
+        async function addAchievement() {
+            const newAchievement = {
+                title: document.getElementById('achTitle').value,
+                competition: document.getElementById('achCompetition').value,
+                rank: document.getElementById('achRank').value,
+                score: parseInt(document.getElementById('achScore').value),
+                date: document.getElementById('achDate').value,
+                icon: document.getElementById('achIcon').value || '🏆'
+            };
+            const res = await fetch('/api/admin/achievements', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': authToken },
+                body: JSON.stringify(newAchievement)
+            });
+            if (res.ok) { showAlert('Achievement added!', 'success'); loadAchievements(); loadDashboard(); }
+            else showAlert('Failed to add', 'error');
+        }
+
+        async function deleteAchievement(id) {
+            if (!confirm('Delete this achievement?')) return;
+            const res = await fetch(`/api/admin/achievements/${id}`, { method: 'DELETE', headers: { 'Authorization': authToken } });
+            if (res.ok) { showAlert('Deleted!', 'success'); loadAchievements(); loadDashboard(); }
+            else showAlert('Failed to delete', 'error');
+        }
+
+        async function addSkill() {
+            const newSkill = {
+                name: document.getElementById('skillName').value,
+                category: document.getElementById('skillCategory').value,
+                level: parseInt(document.getElementById('skillLevel').value)
+            };
+            const res = await fetch('/api/admin/skills', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': authToken },
+                body: JSON.stringify(newSkill)
+            });
+            if (res.ok) { showAlert('Skill added!', 'success'); loadSkills(); loadDashboard(); }
+            else showAlert('Failed to add', 'error');
+        }
+
+        async function deleteSkill(id) {
+            if (!confirm('Delete this skill?')) return;
+            const res = await fetch(`/api/admin/skills/${id}`, { method: 'DELETE', headers: { 'Authorization': authToken } });
+            if (res.ok) { showAlert('Deleted!', 'success'); loadSkills(); loadDashboard(); }
+            else showAlert('Failed to delete', 'error');
+        }
+
+        async function addDocument() {
+            const newDoc = {
+                title: document.getElementById('docTitle').value,
+                category: document.getElementById('docCategory').value,
+                content: document.getElementById('docContent').value
+            };
+            const res = await fetch('/api/admin/documents', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': authToken },
+                body: JSON.stringify(newDoc)
+            });
+            if (res.ok) { showAlert('Document added!', 'success'); loadDocuments(); loadDashboard(); }
+            else showAlert('Failed to add', 'error');
+        }
+
+        async function deleteDocument(id) {
+            if (!confirm('Delete this document?')) return;
+            const res = await fetch(`/api/admin/documents/${id}`, { method: 'DELETE', headers: { 'Authorization': authToken } });
+            if (res.ok) { showAlert('Deleted!', 'success'); loadDocuments(); loadDashboard(); }
+            else showAlert('Failed to delete', 'error');
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Check for existing token
+        const savedToken = localStorage.getItem('adminToken');
+        if (savedToken) { authToken = savedToken; document.getElementById('adminDashboard').style.display = 'block'; loadDashboard(); loadAchievements(); loadSkills(); loadDocuments(); }
+        else { document.getElementById('loginModal').style.display = 'block'; }
+    </script>
+</body>
+</html>
